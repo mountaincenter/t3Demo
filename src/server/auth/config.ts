@@ -1,4 +1,5 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { SupabaseAdapter } from "@auth/supabase-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 
@@ -43,7 +44,13 @@ export const authConfig = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-  adapter: PrismaAdapter(db),
+  adapter:
+    process.env.VERCEL_ENV === "production"
+      ? SupabaseAdapter({
+          url: process.env.SUPABASE_URL!,
+          secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        })
+      : PrismaAdapter(db),
   callbacks: {
     session: ({ session, user }) => ({
       ...session,
